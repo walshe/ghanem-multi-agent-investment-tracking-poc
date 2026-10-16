@@ -29,6 +29,80 @@ set -a; source ../.env; set +a   # needs PROVIDER_SIGNING_SECRET
 - `/admin/send-callback` ignores chaos and payment status, sends all copies at once (each on its
   own thread, released together), does not retry, and reports each backend status.
 
+## Diagrams
+
+### Payment lifecycle
+
+Only PROCESSING, SUCCEEDED and FAILED send a callback. CANCELLED and REFUNDED are visible only
+through `GET /payments/{paymentId}`.
+
+```mermaid
+stateDiagram-v2
+    [*] --> PENDING: POST /payments
+    PENDING --> PROCESSING: after delaySeconds
+    PROCESSING --> SUCCEEDED: 1s later
+    PROCESSING --> FAILED: 1s later, fail mode
+    PENDING --> CANCELLED: POST cancel
+    PROCESSING --> CANCELLED: POST cancel
+    SUCCEEDED --> REFUNDED: POST refund
+    FAILED --> [*]
+    CANCELLED --> [*]
+    REFUNDED --> [*]
+```
+
+### Automatic callbacks and retries
+
+What happens at each status change. The scheduler thread never waits on HTTP; sending runs on
+a separate virtual thread.
+
+```mermaid
+sequenceDiagram
+    participant S as Scheduler
+    participant PS as PaymentService
+    participant CS as CallbackSender
+    participant B as Backend /callbacks
+
+    S->>PS: toProcessing() / toFinal()
+    PS->>PS: change status, callbacksFor() applies chaos
+    Note over PS: drop = none, duplicate = 2 copies,<br/>reverse = hold PROCESSING until final
+    PS->>CS: prepare(event) - serialise once, sign those bytes
+    PS->>CS: sendInOrder(callbacks)
+    loop each callback, in order
+        CS->>CS: attempt() - stop if payment CANCELLED
+        CS->>B: POST body + X-Signature (sendOnce)
+        alt 2xx
+            B-->>CS: 200
+        else non-2xx or no answer
+            B-->>CS: 401 / 500 / timeout
+            Note over CS,B: retry up to 3 times, 2s apart,<br/>same eventId, bytes and signature
+        end
+    end
+```
+
+### `/admin/send-callback`
+
+All copies share one body and signature, and are released together by a single gate.
+No retries, and chaos settings are ignored.
+
+```mermaid
+sequenceDiagram
+    participant T as Tester
+    participant M as ManualCallbackService
+    participant CS as CallbackSender
+    participant B as Backend /callbacks
+
+    T->>M: POST /admin/send-callback (copies = N)
+    M->>CS: prepare(event) once
+    par copy 1
+        M->>B: POST (sendOnce)
+        B-->>M: status
+    and copy N
+        M->>B: POST (sendOnce)
+        B-->>M: status
+    end
+    M-->>T: results with eventId and backendStatus per copy
+```
+
 ## Interpretations (contract is silent)
 
 - `reverse`: the PROCESSING callback is held back and sent straight after the final callback.
