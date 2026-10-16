@@ -1,0 +1,13 @@
+{
+  "name": "checkout-mobile-tools",
+  "private": true,
+  "description": "Node tooling for the Flutter app: API client generation and the contract mock server.",
+  "scripts": {
+    "generate-api": "./tool/generate_api.sh",
+    "mock": "prism mock ../contract/checkout-api.yaml"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.41.0",
+    "@stoplight/prism-cli": "^5.14.2"
+  }
+}
