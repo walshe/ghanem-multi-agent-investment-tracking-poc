@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Responsibility: check callback retries: byte-identical retries until a 2xx, giving up after 3,
+ * and that an unreachable backend does not stop the payment.
+ */
 class RetryTest extends ProviderTestBase {
 
     @Test

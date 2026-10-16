@@ -9,6 +9,10 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.JsonNode;
 
+/**
+ * Responsibility: check callback signing: the HMAC itself, that callbacks are signed over the
+ * exact bytes sent with the configured secret, and that the body is a valid PaymentEvent.
+ */
 class SigningTest extends ProviderTestBase {
 
     @Test

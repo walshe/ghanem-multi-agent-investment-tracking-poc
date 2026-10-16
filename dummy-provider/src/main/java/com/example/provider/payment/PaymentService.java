@@ -25,13 +25,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * The payment lifecycle from contract/provider-api.yaml:
+ * Responsibility: own the payment rules: create (idempotently), get, cancel, refund, and drive
+ * each payment through its timed lifecycle.
+ *
  * <pre>
  *   PENDING -> PROCESSING after delaySeconds
  *           -> SUCCEEDED (or FAILED in "fail" mode) finalAfter later
  * </pre>
- * A signed callback with a new eventId is sent at each change, shaped by the chaos settings
- * the payment was created with.
+ *
+ * <p>Also the one place that applies the payment-level chaos modes: decides which callbacks a
+ * status change produces (drop, duplicate, reverse, badSignature), whether it ends FAILED
+ * (fail), and whether cancel is refused (cancelTooLate).
+ *
+ * <p>Stores payments in memory. Delivery of callbacks is delegated to {@link CallbackSender}.
  */
 @Service
 public class PaymentService {

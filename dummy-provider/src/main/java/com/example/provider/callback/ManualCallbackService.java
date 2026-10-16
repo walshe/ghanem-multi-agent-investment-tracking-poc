@@ -13,8 +13,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * POST /admin/send-callback. Ignores chaos settings and payment status. Sends once per copy,
- * with no retries, and reports what the backend answered.
+ * Responsibility: carry out {@code POST /admin/send-callback}, i.e. send a hand-made callback
+ * for an existing payment right now.
+ *
+ * <p>Builds the event from the request (new or given eventId, real or given amount), prepares it
+ * once, releases all copies together through a single gate, and collects the backend's status
+ * for each copy.
+ *
+ * <p>Deliberately ignores chaos settings and payment status, never changes the payment, and never
+ * retries. HTTP delivery itself is delegated to {@link CallbackSender#sendOnce}.
  */
 @Service
 public class ManualCallbackService {

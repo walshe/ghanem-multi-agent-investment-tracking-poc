@@ -6,6 +6,10 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.JsonNode;
 
+/**
+ * Responsibility: check {@code POST /admin/send-callback}: overrides, copies sent at the same
+ * time, reported backend statuses, no retries, and that it works in every chaos mode.
+ */
 class SendCallbackTest extends ProviderTestBase {
 
     @Test

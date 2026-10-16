@@ -9,7 +9,14 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.stereotype.Component;
 
-/** Signs callback bodies: lowercase hex HMAC-SHA256 of the exact body bytes. */
+/**
+ * Responsibility: compute callback signatures: lowercase hex HMAC-SHA256 of the given bytes.
+ *
+ * <p>Signs with the configured secret, or with a random key generated at startup that is never
+ * the real secret (for {@code badSignature} mode and {@code validSignature: false}).
+ *
+ * <p>Does not serialise or send anything.
+ */
 @Component
 public class Signer {
 

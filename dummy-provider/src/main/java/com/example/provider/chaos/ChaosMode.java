@@ -2,7 +2,12 @@ package com.example.provider.chaos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/** ChaosMode from contract/provider-api.yaml. JSON names are exactly as in the contract. */
+/**
+ * Responsibility: list the chaos modes, with JSON names exactly as in the contract.
+ *
+ * <p>What each mode does is implemented in
+ * {@link com.example.provider.payment.PaymentService} (lifecycle and which callbacks are sent).
+ */
 public enum ChaosMode {
     /** Send every callback twice. */
     @JsonProperty("duplicate") DUPLICATE,

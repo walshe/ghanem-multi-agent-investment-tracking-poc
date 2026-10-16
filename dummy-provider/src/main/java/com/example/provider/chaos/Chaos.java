@@ -7,8 +7,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Chaos schema from contract/provider-api.yaml. Also used as the immutable snapshot
- * that each payment takes when it is created.
+ * Responsibility: be the chaos settings value: the Chaos schema from contract/provider-api.yaml.
+ *
+ * <p>Immutable. The same type is used as the API body and as the snapshot each payment takes
+ * when it is created. {@link #normalised()} removes duplicate modes and fills in the default
+ * delay.
  */
 public record Chaos(@NotNull List<@NotNull ChaosMode> modes, @Min(0) Integer delaySeconds) {
 

@@ -5,6 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Responsibility: check each chaos mode, the chaos endpoints, and that chaos only applies to
+ * payments created after it is set.
+ */
 class ChaosTest extends ProviderTestBase {
 
     @Test

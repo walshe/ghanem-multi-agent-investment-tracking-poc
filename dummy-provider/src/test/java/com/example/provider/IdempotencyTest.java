@@ -13,6 +13,10 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Responsibility: check that the same Idempotency-Key never creates a second payment or a second
+ * refund, including under concurrent requests.
+ */
 class IdempotencyTest extends ProviderTestBase {
 
     // ---- payments ----

@@ -19,9 +19,12 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Runs the real app on a random port against a {@link FakeBackend}. Uses the test signing
- * secret and shorter PROCESSING-to-final and retry gaps so tests stay fast. The contract
- * timings themselves are checked in {@link ContractTimingsTest}.
+ * Responsibility: shared setup and helpers for tests that run the real app over HTTP.
+ *
+ * <p>Starts the app on a random port with the test signing secret and shorter
+ * PROCESSING-to-final and retry gaps so tests stay fast, gives each test a fresh
+ * {@link FakeBackend}, resets chaos, and offers HTTP and waiting helpers. The contract timings
+ * themselves are checked in {@link ContractTimingsTest}.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
         "provider.signing-secret=" + ProviderTestBase.TEST_SECRET,

@@ -7,8 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
- * Runs with the timings from application.yml (the contract's): delaySeconds 1 by default,
- * final status 1 second after PROCESSING, 3 retries 2 seconds apart.
+ * Responsibility: check the timings from the contract, using the real values from
+ * application.yml: delaySeconds 1 by default, final status 1 second after PROCESSING, and 3
+ * retries 2 seconds apart.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = "provider.signing-secret=" + ProviderTestBase.TEST_SECRET)

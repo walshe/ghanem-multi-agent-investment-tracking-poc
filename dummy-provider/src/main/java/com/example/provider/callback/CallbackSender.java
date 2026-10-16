@@ -16,7 +16,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 
-/** Serialises, signs and POSTs callbacks, and retries the ones that don't get a 2xx. */
+/**
+ * Responsibility: deliver callbacks to the backend: prepare them, POST them, and retry the
+ * ones that don't get a 2xx.
+ *
+ * <ul>
+ *   <li>{@link #prepare}: serialise a {@link PaymentEvent} once and sign exactly those bytes
+ *       (signing itself is delegated to {@link Signer}).</li>
+ *   <li>{@link #sendInOrder}: send in the background, in order, with retries
+ *       ({@code maxRetries} times, {@code retryInterval} apart, byte-identical each time).</li>
+ *   <li>{@link #sendOnce}: one POST, returning the backend's HTTP status.</li>
+ * </ul>
+ *
+ * <p>Does not decide <em>which</em> callbacks to send or apply chaos rules; callers do that.
+ */
 @Component
 public class CallbackSender {
 

@@ -3,7 +3,12 @@ package com.example.provider.chaos;
 import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.stereotype.Component;
 
-/** The current chaos settings. New payments take a snapshot of these when created. */
+/**
+ * Responsibility: hold the current chaos settings, safely shared between threads.
+ *
+ * <p>New payments copy these when they are created, so changing them never affects existing
+ * payments. Does not apply any chaos itself.
+ */
 @Component
 public class ChaosSettings {
 

@@ -16,8 +16,11 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Stands in for the backend's POST /callbacks. Records every request exactly as received and
- * answers with a status chosen by the test (by default: 200 if the signature is valid, else 401).
+ * Responsibility: stand in for the backend's {@code POST /callbacks} in tests.
+ *
+ * <p>Records every request exactly as received (signature header, raw body bytes, arrival time,
+ * status answered), tracks how many requests were in flight at once, and answers with a status
+ * chosen by the test (by default 200 if the signature is valid, else 401).
  */
 public class FakeBackend implements AutoCloseable {
 

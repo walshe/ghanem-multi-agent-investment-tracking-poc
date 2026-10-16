@@ -8,8 +8,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Settings for the provider. The defaults in application.yml are the timings from
- * contract/provider-api.yaml.
+ * Responsibility: hold the provider's typed, validated configuration ({@code provider.*}).
+ *
+ * <p>The defaults in application.yml are the timings from contract/provider-api.yaml. Startup
+ * fails if the signing secret is missing. {@link #toString()} never prints the secret.
  *
  * @param signingSecret   HMAC key for callbacks, from PROVIDER_SIGNING_SECRET
  * @param finalAfter      time from PROCESSING to SUCCEEDED/FAILED (contract: 1 second)

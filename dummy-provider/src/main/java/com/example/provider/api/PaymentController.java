@@ -16,6 +16,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Responsibility: expose the {@code /payments} endpoints over HTTP.
+ *
+ * <p>Reads the {@code Idempotency-Key} header, validates request bodies, and picks the HTTP
+ * status (201 for a new payment, 200 for a repeated key). All payment rules are in
+ * {@link PaymentService}; 404 and 409 come from there as {@code ResponseStatusException}s.
+ */
 @RestController
 @RequestMapping("/payments")
 public class PaymentController {

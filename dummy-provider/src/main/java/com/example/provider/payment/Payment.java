@@ -10,8 +10,11 @@ import java.util.UUID;
 import java.util.concurrent.ScheduledFuture;
 
 /**
- * A payment held in memory. The fixed fields never change. Everything mutable is guarded by
- * the payment's own monitor ({@code synchronized (payment)}).
+ * Responsibility: hold the in-memory state of one payment.
+ *
+ * <p>The fixed fields never change. Everything mutable is guarded by the payment's own monitor
+ * ({@code synchronized (payment)}). State changes are made only by
+ * {@link PaymentService}, which owns the rules; this class just stores them.
  */
 public final class Payment {
 

@@ -4,6 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ * Responsibility: check cancel behaviour: which statuses can be cancelled, and that a cancel
+ * stops all further status changes, callbacks and retries.
+ */
 class CancelTest extends ProviderTestBase {
 
     @Test

@@ -10,7 +10,14 @@ import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import java.util.UUID;
 
-/** Request and response bodies from contract/provider-api.yaml. */
+/**
+ * Responsibility: define the HTTP request and response bodies from contract/provider-api.yaml,
+ * with their validation rules.
+ *
+ * <p>Plain data only. The Payment response body is
+ * {@link com.example.provider.payment.PaymentView}, and the Chaos body is
+ * {@link com.example.provider.chaos.Chaos}.
+ */
 public final class ApiModels {
 
     private ApiModels() {

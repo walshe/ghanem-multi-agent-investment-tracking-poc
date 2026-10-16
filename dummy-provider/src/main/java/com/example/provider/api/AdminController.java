@@ -15,7 +15,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Test-only endpoints for driving the backend into awkward situations. */
+/**
+ * Responsibility: expose the test-only {@code /admin} endpoints over HTTP.
+ *
+ * <p>Maps requests to {@link ChaosSettings} (GET/PUT {@code /admin/chaos}) and
+ * {@link ManualCallbackService} ({@code /admin/send-callback}), validates the request bodies and
+ * fills in contract defaults ({@code validSignature = true}, {@code copies = 1}).
+ *
+ * <p>Holds no logic of its own.
+ */
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
