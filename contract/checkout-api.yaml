@@ -1,0 +1,197 @@
+openapi: 3.0.3
+info:
+  title: Checkout API
+  version: 0.1.0
+  description: |
+    The Spring Boot backend. The React and Flutter apps use the "checkouts" endpoints.
+    The payment provider calls POST /callbacks.
+    The status rules and callback processing steps are in states.md.
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: checkouts
+    description: Used by the apps.
+  - name: audit
+    description: For support and tests. Not shown to customers.
+  - name: callbacks
+    description: Called by the payment provider.
+paths:
+  /checkouts:
+    post:
+      operationId: createCheckout
+      tags: [checkouts]
+      summary: Start an investment checkout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCheckoutRequest'
+      responses:
+        '201':
+          description: Checkout created. Status is PENDING.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Checkout'
+        '400':
+          description: Invalid amount or currency.
+  /checkouts/{checkoutId}:
+    get:
+      operationId: getCheckout
+      tags: [checkouts]
+      summary: Get the current status of a checkout
+      parameters:
+        - $ref: '#/components/parameters/CheckoutId'
+      responses:
+        '200':
+          description: The checkout.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Checkout'
+        '404':
+          description: No checkout with this id.
+  /checkouts/{checkoutId}/events:
+    get:
+      operationId: getCheckoutEvents
+      tags: [audit]
+      summary: Every payment event received for this checkout, and what was done with it
+      parameters:
+        - $ref: '#/components/parameters/CheckoutId'
+      responses:
+        '200':
+          description: Events, oldest first.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CheckoutEvent'
+        '404':
+          description: No checkout with this id.
+  /callbacks:
+    post:
+      operationId: receivePaymentCallback
+      tags: [callbacks]
+      summary: Payment status callback from the provider
+      description: Processed exactly as described in states.md.
+      parameters:
+        - name: X-Signature
+          in: header
+          required: true
+          description: Lowercase hex HMAC-SHA256 of the raw request body, keyed with the shared signing secret.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentEvent'
+      responses:
+        '200':
+          description: >-
+            Received. Also returned for duplicates, stale events and flagged events,
+            so the provider stops retrying.
+        '401':
+          description: Missing or invalid signature. Nothing was stored.
+components:
+  parameters:
+    CheckoutId:
+      name: checkoutId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    CheckoutStatus:
+      type: string
+      enum: [PENDING, PROCESSING, SUCCEEDED, FAILED, EXPIRED]
+    PaymentEventStatus:
+      type: string
+      description: Statuses the provider can report. PENDING and EXPIRED are ours, never the provider's.
+      enum: [PROCESSING, SUCCEEDED, FAILED]
+    EventOutcome:
+      type: string
+      enum: [APPLIED, IGNORED_STALE, FLAGGED]
+    CreateCheckoutRequest:
+      type: object
+      required: [amountMinor, currency]
+      properties:
+        amountMinor:
+          type: integer
+          format: int64
+          minimum: 100
+          description: Amount in cents. 10050 means 100.50.
+          example: 10050
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          example: EUR
+    Checkout:
+      type: object
+      required: [checkoutId, status, amountMinor, currency, createdAt, updatedAt]
+      properties:
+        checkoutId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/CheckoutStatus'
+        amountMinor:
+          type: integer
+          format: int64
+        currency:
+          type: string
+        paymentId:
+          type: string
+          nullable: true
+          description: The provider's payment id. Null until the provider has accepted the payment.
+        refundRequested:
+          type: boolean
+          description: True if a refund was requested because a payment succeeded after the checkout expired.
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    PaymentEvent:
+      type: object
+      required: [eventId, checkoutId, paymentId, status, amountMinor, currency, occurredAt]
+      properties:
+        eventId:
+          type: string
+          description: Unique per event. Used as the idempotency key.
+        checkoutId:
+          type: string
+          format: uuid
+        paymentId:
+          type: string
+        status:
+          $ref: '#/components/schemas/PaymentEventStatus'
+        amountMinor:
+          type: integer
+          format: int64
+        currency:
+          type: string
+        occurredAt:
+          type: string
+          format: date-time
+    CheckoutEvent:
+      type: object
+      required: [eventId, status, outcome, receivedAt]
+      properties:
+        eventId:
+          type: string
+        status:
+          $ref: '#/components/schemas/PaymentEventStatus'
+        amountMinor:
+          type: integer
+          format: int64
+        outcome:
+          $ref: '#/components/schemas/EventOutcome'
+        receivedAt:
+          type: string
+          format: date-time

@@ -1,0 +1,262 @@
+openapi: 3.0.3
+info:
+  title: Dummy Payment Provider API
+  version: 0.1.0
+  description: |
+    A fake payment provider for the proof of concept. Payments are kept in memory.
+
+    Payment lifecycle:
+      PENDING -> PROCESSING after `delaySeconds` (default 1)
+              -> SUCCEEDED 1 second later (FAILED in "fail" mode)
+
+    At each change the provider POSTs a signed PaymentEvent (defined in
+    checkout-api.yaml) to the payment's callbackUrl, with a new unique eventId.
+    X-Signature is the lowercase hex HMAC-SHA256 of the exact body bytes, keyed with
+    PROVIDER_SIGNING_SECRET. A callback that doesn't get a 2xx answer is retried
+    3 times, 2 seconds apart, with the same eventId and body.
+
+    The /admin endpoints exist only to test the backend.
+servers:
+  - url: http://localhost:8081
+paths:
+  /payments:
+    post:
+      operationId: createPayment
+      summary: Start a payment
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaymentRequest'
+      responses:
+        '201':
+          description: Payment created. Status is PENDING.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '200':
+          description: This Idempotency-Key was used before. The existing payment is returned and no new payment is created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+  /payments/{paymentId}:
+    get:
+      operationId: getPayment
+      summary: Current status of a payment
+      parameters:
+        - $ref: '#/components/parameters/PaymentId'
+      responses:
+        '200':
+          description: The payment.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '404':
+          description: No payment with this id.
+  /payments/{paymentId}/cancel:
+    post:
+      operationId: cancelPayment
+      summary: Cancel a payment that hasn't completed
+      parameters:
+        - $ref: '#/components/parameters/PaymentId'
+      responses:
+        '200':
+          description: Cancelled (or already cancelled). No further changes or callbacks for this payment.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '409':
+          description: >-
+            Too late to cancel. Either the payment already finished, or chaos mode
+            cancelTooLate is on, in which case the payment still completes.
+        '404':
+          description: No payment with this id.
+  /payments/{paymentId}/refund:
+    post:
+      operationId: refundPayment
+      summary: Refund a succeeded payment
+      parameters:
+        - $ref: '#/components/parameters/PaymentId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: >-
+            Refunded. Status is REFUNDED. Repeating the same Idempotency-Key returns
+            the same result and does not refund again.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '409':
+          description: The payment is not SUCCEEDED, so there is nothing to refund.
+        '404':
+          description: No payment with this id.
+  /admin/chaos:
+    get:
+      operationId: getChaos
+      summary: Current chaos settings
+      responses:
+        '200':
+          description: Current settings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chaos'
+    put:
+      operationId: setChaos
+      summary: Set chaos settings for payments created after this call
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Chaos'
+      responses:
+        '204':
+          description: Saved.
+  /admin/send-callback:
+    post:
+      operationId: sendCallback
+      summary: Send a callback of your choice for an existing payment, right now
+      description: Works in every chaos mode, including drop.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendCallbackRequest'
+      responses:
+        '200':
+          description: Sent. Shows the HTTP status the backend answered for each copy.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendCallbackResult'
+        '404':
+          description: No payment with this id.
+components:
+  parameters:
+    PaymentId:
+      name: paymentId
+      in: path
+      required: true
+      schema:
+        type: string
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+  schemas:
+    PaymentStatus:
+      type: string
+      enum: [PENDING, PROCESSING, SUCCEEDED, FAILED, CANCELLED, REFUNDED]
+    CallbackStatus:
+      type: string
+      description: Must match PaymentEventStatus in checkout-api.yaml.
+      enum: [PROCESSING, SUCCEEDED, FAILED]
+    ChaosMode:
+      type: string
+      description: |
+        duplicate     - send every callback twice
+        reverse       - send the final callback (SUCCEEDED or FAILED) before PROCESSING
+        drop          - send no callbacks automatically (the payment still completes)
+        badSignature  - sign callbacks with the wrong secret
+        fail          - the payment ends FAILED instead of SUCCEEDED
+        cancelTooLate - cancel requests get 409 and the payment still completes
+      enum: [duplicate, reverse, drop, badSignature, fail, cancelTooLate]
+    Chaos:
+      type: object
+      required: [modes]
+      properties:
+        modes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChaosMode'
+        delaySeconds:
+          type: integer
+          minimum: 0
+          default: 1
+          description: Seconds a payment stays PENDING before it moves to PROCESSING.
+    CreatePaymentRequest:
+      type: object
+      required: [checkoutId, amountMinor, currency, callbackUrl]
+      properties:
+        checkoutId:
+          type: string
+          format: uuid
+        amountMinor:
+          type: integer
+          format: int64
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        callbackUrl:
+          type: string
+          example: http://localhost:8080/callbacks
+    Payment:
+      type: object
+      required: [paymentId, checkoutId, status, amountMinor, currency, refundCount]
+      properties:
+        paymentId:
+          type: string
+        checkoutId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        amountMinor:
+          type: integer
+          format: int64
+        currency:
+          type: string
+        refundCount:
+          type: integer
+          description: How many refunds actually happened. Must never be more than 1.
+    SendCallbackRequest:
+      type: object
+      required: [paymentId, status]
+      properties:
+        paymentId:
+          type: string
+        status:
+          $ref: '#/components/schemas/CallbackStatus'
+        eventId:
+          type: string
+          description: Leave out to get a new unique eventId. Reuse one to send a duplicate.
+        amountMinor:
+          type: integer
+          format: int64
+          description: Leave out to use the payment's real amount. Set it to test an amount mismatch.
+        validSignature:
+          type: boolean
+          default: true
+        copies:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 1
+          description: How many identical copies to send. All copies are sent at the same time.
+    SendCallbackResult:
+      type: object
+      required: [results]
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            required: [eventId, backendStatus]
+            properties:
+              eventId:
+                type: string
+              backendStatus:
+                type: integer
+                description: HTTP status the backend answered, e.g. 200 or 401.
