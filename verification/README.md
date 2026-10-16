@@ -40,7 +40,7 @@ Run one scenario:
 
 To only check that the tests compile: `./mvnw test-compile`.
 
-A full run takes about 2–3 minutes, mostly waiting for the scheduled job (expiry, late success).
+A full run takes about 1 minute, mostly waiting for the scheduled job (expiry, late success).
 
 ## Important: one test at a time
 
