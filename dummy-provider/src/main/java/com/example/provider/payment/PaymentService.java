@@ -38,6 +38,11 @@ import org.springframework.web.server.ResponseStatusException;
  * (fail), and whether cancel is refused (cancelTooLate).
  *
  * <p>Stores payments in memory. Delivery of callbacks is delegated to {@link CallbackSender}.
+ *
+ * <p>Note: this is more than one responsibility. In a real service it could be split further,
+ * e.g. a {@code PaymentLifecycle} for the scheduled status changes and a
+ * {@code CallbackPlanner} that turns a status change plus chaos settings into callbacks. Kept
+ * together on purpose, because for a PoC one readable class is worth more than the extra seams.
  */
 @Service
 public class PaymentService {
