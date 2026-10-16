@@ -10,7 +10,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** HTTP calls to the dummy payment provider, as described in contract/provider-api.yaml. */
+/**
+ * <b>Responsibility:</b> talk HTTP to the dummy payment provider, exactly as described in
+ * {@code contract/provider-api.yaml}, and turn its JSON into simple Java records.
+ *
+ * <p>The tests use it for three things: setting chaos modes, reading a payment's status and
+ * refund count, and sending hand-made callbacks to the backend through
+ * {@code POST /admin/send-callback}. Each method checks only the HTTP status the contract
+ * promises for a normal call. It makes no decisions about whether the backend behaved
+ * correctly; that is the job of {@link CheckoutScenariosTest}.
+ *
+ * <p>It does not call the backend directly (see {@link Backend}), and it gets its base URL
+ * from {@link TestConfig}.
+ */
 final class Provider {
 
     private static final RequestSpecification SPEC = new RequestSpecBuilder()
@@ -65,7 +77,11 @@ final class Provider {
                 ((Number) json.get("refundCount")).intValue());
     }
 
-    /** Builder-style options for POST /admin/send-callback. Null fields are left out of the request. */
+    /**
+     * <b>Responsibility:</b> describe one POST /admin/send-callback request and build its JSON
+     * body. Fields left unset are left out, so the provider uses its defaults (new eventId,
+     * real amount, valid signature, one copy). It does not send anything; {@link #sendCallback} does.
+     */
     static final class CallbackRequest {
         private final String paymentId;
         private final String status;

@@ -30,7 +30,13 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
 /**
- * Black-box scenarios for the checkout backend and the dummy provider.
+ * <b>Responsibility:</b> decide whether the backend and the dummy provider together behave as
+ * {@code contract/states.md} says, one scenario per test.
+ *
+ * <p>Each test sets up a situation (chaos mode, hand-made callbacks), waits for the system to
+ * react, and asserts the outcome: checkout status, audit events and the provider's payment
+ * state. This class holds all the expectations. It does not build HTTP requests or parse
+ * JSON itself; it uses {@link Backend} and {@link Provider} for that.
  *
  * <p>Assumes the backend runs with the "fast" profile (contract/states.md):
  * reconcile-after 5s, expire-after 10s, job-interval 2s.
