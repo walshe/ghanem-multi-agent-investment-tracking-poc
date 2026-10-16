@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: checkout-backend
+  datasource:
+    # LOCK_TIMEOUT: a second insert of the same eventId waits for the first transaction to
+    # finish and then fails on the unique constraint, instead of timing out.
+    url: jdbc:h2:mem:checkout;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=10000
+    username: sa
+    password: ""
+
+server:
+  port: 8080
+
+provider:
+  base-url: http://localhost:8081
+  # Required. No default on purpose: the app won't start without it.
+  signing-secret: ${PROVIDER_SIGNING_SECRET}
+  connect-timeout: 2s
+  read-timeout: 5s
+
+checkout:
+  callback-url: http://localhost:8080/callbacks
+  reconcile-after: 10m
+  expire-after: 30m
+  job-interval: 60s
+  job-enabled: true
+  cors-allowed-origins:
+    - http://localhost:5173
+    - http://localhost:5174

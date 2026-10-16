@@ -1,0 +1,5 @@
+# Short timings for manual and automated testing (see the table in contract/states.md).
+checkout:
+  reconcile-after: 5s
+  expire-after: 10s
+  job-interval: 2s
