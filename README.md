@@ -8,18 +8,27 @@ The hard part is that callbacks can arrive late, out of order, more than once, w
 signature, or not at all. The backend has to end up with the right status anyway, and never
 charge or refund a customer twice.
 
-![Invest screen](web/step1.png)
+## Screenshots
+
+The same invest flow in both apps: enter an amount, wait for the payment, see it confirmed.
+
+| | 1. Invest | 2. Waiting (PENDING) | 3. Confirmed (SUCCEEDED) |
+|---|---|---|---|
+| **React** | ![React invest screen](web/step1.png) | ![React status screen while pending](web/step2.png) | ![React status screen after success](web/step3.png) |
+| **Flutter** | ![Flutter invest screen](mobile/docs/screenshots/1-invest.png) | ![Flutter status screen while pending](mobile/docs/screenshots/2-status-pending.png) | ![Flutter status screen after success](mobile/docs/screenshots/3-status-succeeded.png) |
 
 ## How it fits together
 
 ```mermaid
 flowchart LR
     web["React app<br/>:5173"]
+    mobile["Flutter app<br/>:5174"]
     backend["Checkout backend<br/>:8080"]
     provider["Dummy payment provider<br/>:8081"]
     tests["Verification tests"]
 
     web -- "create checkout, poll status" --> backend
+    mobile -- "create checkout, poll status" --> backend
     backend -- "start, check, cancel, refund payment" --> provider
     provider -- "signed callbacks" --> backend
     tests -- "HTTP only" --> backend
@@ -43,6 +52,7 @@ flowchart LR
 | [`backend/`](backend/) | Spring Boot checkout service | 8080 | [backend/README.md](backend/README.md) |
 | [`dummy-provider/`](dummy-provider/) | Fake payment provider with chaos modes | 8081 | [dummy-provider/README.md](dummy-provider/README.md) |
 | [`web/`](web/) | React + TypeScript app | 5173 | [web/README.md](web/README.md) |
+| [`mobile/`](mobile/) | Flutter app (runs in Chrome for the PoC) | 5174 | [mobile/README.md](mobile/README.md) |
 | [`verification/`](verification/) | Independent black-box tests | | [verification/README.md](verification/README.md) |
 
 ### contract
@@ -72,17 +82,18 @@ sends a callback of your choice on demand. See [dummy-provider/README.md](dummy-
 ### web
 
 Customers enter an amount in EUR, then see the status until it is final.
-See [web/README.md](web/README.md) for screenshots.
+See [web/README.md](web/README.md).
+
+### mobile
+
+The same two screens in Flutter, with a Dart client generated from the contract. It runs in
+Chrome for the PoC. See [mobile/README.md](mobile/README.md).
 
 ### verification
 
 JUnit tests that check the running backend and provider over HTTP only, written from the
 contract without looking at the other projects' code. See
 [verification/README.md](verification/README.md).
-
-### mobile (not built yet)
-
-A Flutter version of the app is planned on port 5174. Its branch has no commits yet.
 
 ## How it was built: one Claude Code agent per project
 
@@ -142,13 +153,14 @@ git merge worktree-mobile
 
 ## Run it
 
-You need Java 21+ and Node 20+. Copy `.env.example` to `.env` and put a random signing secret
-in it (`openssl rand -hex 32`). Then, one terminal each:
+You need Java 21+, Node 20+ and Flutter (for the mobile app). Copy `.env.example` to `.env`
+and put a random signing secret in it (`openssl rand -hex 32`). Then, one terminal each:
 
 ```bash
 set -a; source .env; set +a; cd dummy-provider && ./mvnw spring-boot:run
 set -a; source .env; set +a; cd backend && ./mvnw spring-boot:run -Dspring-boot.run.profiles=fast
 cd web && npm install && npm run dev                  # http://localhost:5173
+cd mobile && flutter run -d chrome --web-port 5174    # http://localhost:5174
 ```
 
 With both services running, run the independent tests:
