@@ -14,7 +14,18 @@ import poc.checkout.callback.CallbackParser.Callback;
 import poc.checkout.callback.CallbackParser.InvalidCallbackException;
 import poc.checkout.provider.ProviderException;
 
-/** POST /callbacks, called by the payment provider. */
+/**
+ * <b>Responsibility:</b> the HTTP layer for POST /callbacks. It runs the steps in the right order
+ * and turns each result into the status code the provider expects.
+ *
+ * <p>Order: (1) verify the signature on the raw body bytes, then parse, then pass the event on for
+ * steps 2 to 5. Status codes: 401 for a bad signature (nothing stored), 400 for a signed but
+ * malformed body, 200 for anything processed (including duplicate, stale and flagged), 500 when
+ * nothing was stored and the provider should retry.
+ *
+ * <p><b>Not responsible for:</b> the HMAC itself ({@link SignatureVerifier}), JSON parsing
+ * ({@link CallbackParser}), or the status rules ({@link CallbackService}).
+ */
 @RestController
 public class CallbackController {
 

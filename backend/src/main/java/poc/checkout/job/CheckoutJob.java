@@ -27,8 +27,21 @@ import poc.checkout.service.RefundService;
 import poc.checkout.service.RetryingTransaction;
 
 /**
- * "Late and missing callbacks (scheduled job)" from contract/states.md. Scheduled by
- * {@link poc.checkout.config.SchedulingConfig}. Ages are measured from the checkout's createdAt.
+ * <b>Responsibility:</b> look after checkouts whose callbacks are late or missing. This is
+ * "Late and missing callbacks (scheduled job)" in contract/states.md.
+ *
+ * <p>One {@link #runOnce()} goes through every checkout that still needs attention and, in order:
+ * <ol start="0">
+ *   <li>retries POST /payments if the provider never accepted the payment;</li>
+ *   <li>reconciles a non-final checkout older than reconcile-after with the provider's status;</li>
+ *   <li>expires a PENDING checkout older than expire-after and cancels its payment;</li>
+ *   <li>follows up a refused cancel until the payment is final, and refunds it if it succeeded;</li>
+ *   <li>logs a warning for a checkout stuck in PROCESSING (never expired automatically).</li>
+ * </ol>
+ * Ages are measured from the checkout's createdAt. One failing checkout doesn't stop the others.
+ *
+ * <p><b>Not responsible for:</b> when it runs ({@link poc.checkout.config.SchedulingConfig}), the
+ * allowed-change table ({@link CheckoutStatus}), or how a refund is made ({@link RefundService}).
  */
 @Component
 public class CheckoutJob {

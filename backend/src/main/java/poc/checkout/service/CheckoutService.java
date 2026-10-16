@@ -20,6 +20,17 @@ import poc.checkout.provider.ProviderClient;
 import poc.checkout.provider.ProviderException;
 import poc.checkout.provider.ProviderPayment;
 
+/**
+ * <b>Responsibility:</b> create checkouts and read them back. This is "Creating a checkout" in
+ * contract/states.md.
+ *
+ * <p>Saves the checkout as PENDING, asks the provider for a payment, and stores the paymentId. If the
+ * provider can't be reached, the checkout stays PENDING without a paymentId; {@link #requestPayment}
+ * is then retried by the scheduled job with the same Idempotency-Key.
+ *
+ * <p><b>Not responsible for:</b> status changes after creation (callbacks and the job), or HTTP
+ * validation ({@link poc.checkout.api.CheckoutController}).
+ */
 @Service
 public class CheckoutService {
 

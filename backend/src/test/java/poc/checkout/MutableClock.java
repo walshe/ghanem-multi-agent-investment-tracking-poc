@@ -6,7 +6,10 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 
-/** A clock tests can move forward, to make checkouts "older than" a setting without waiting. */
+/**
+ * <b>Responsibility:</b> let tests control time. Tests move it forward to make checkouts
+ * "older than" reconcile-after or expire-after without waiting.
+ */
 public class MutableClock extends Clock {
 
     private volatile Instant now = Instant.now();

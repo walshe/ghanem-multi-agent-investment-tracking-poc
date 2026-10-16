@@ -12,7 +12,18 @@ import org.springframework.web.client.RestClientException;
 
 import poc.checkout.config.ProviderProperties;
 
-/** HTTP client for the payment provider (contract/provider-api.yaml). */
+/**
+ * <b>Responsibility:</b> talk HTTP to the payment provider (contract/provider-api.yaml): create,
+ * get, cancel and refund a payment.
+ *
+ * <p>Sets the Idempotency-Key headers, so retries are always safe: {@code {checkoutId}} when creating
+ * a payment, {@code refund-{checkoutId}} when refunding. Translates HTTP results into Java: 409 on
+ * cancel becomes {@link CancelResult#REFUSED}; everything else that fails becomes a
+ * {@link ProviderException}.
+ *
+ * <p><b>Not responsible for:</b> deciding when to call the provider or what to do with the answer
+ * (the services and the job).
+ */
 @Component
 public class ProviderClient {
 

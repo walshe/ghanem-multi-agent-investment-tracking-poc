@@ -7,7 +7,12 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import poc.checkout.job.CheckoutJob;
 
-/** Runs the scheduled job every checkout.job-interval (fixed delay, so runs never overlap). */
+/**
+ * <b>Responsibility:</b> decide <em>when</em> the scheduled job runs: every checkout.job-interval,
+ * with a fixed delay so runs never overlap, and not at all if checkout.job-enabled is false.
+ *
+ * <p><b>Not responsible for:</b> what the job does ({@link CheckoutJob}).
+ */
 @Configuration
 @EnableScheduling
 public class SchedulingConfig implements SchedulingConfigurer {

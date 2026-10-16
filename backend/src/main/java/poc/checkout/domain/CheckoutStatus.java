@@ -4,7 +4,13 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
-/** Checkout statuses and the allowed status changes from contract/states.md. */
+/**
+ * <b>Responsibility:</b> the status rules from contract/states.md: which statuses exist, which
+ * are final, and which status changes are allowed.
+ *
+ * <p>This is the only place the "Allowed status changes" table is coded. The callback handler and
+ * the scheduled job both ask {@link #canChangeTo} rather than having their own rules.
+ */
 public enum CheckoutStatus {
     PENDING,
     PROCESSING,

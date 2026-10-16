@@ -21,9 +21,22 @@ import poc.checkout.service.RefundService;
 import poc.checkout.service.RetryingTransaction;
 
 /**
- * Steps 2 to 5 of "Processing a callback" in contract/states.md, in one database transaction,
- * retried once on an optimistic-locking conflict. Step 1 (signature) is done by the controller
- * on the raw bytes before this is called.
+ * <b>Responsibility:</b> decide what a verified callback does to its checkout. This is steps 2 to 5
+ * of "Processing a callback" in contract/states.md.
+ *
+ * <ol start="2">
+ *   <li>Duplicate: insert the event; an existing eventId means do nothing.</li>
+ *   <li>Amount: amount, currency (and paymentId) must match, otherwise FLAGGED.</li>
+ *   <li>Order: apply the status only if {@link CheckoutStatus#canChangeTo} allows it, otherwise IGNORED_STALE.</li>
+ *   <li>Late success: SUCCEEDED for an EXPIRED checkout triggers a refund.</li>
+ * </ol>
+ *
+ * <p>All four steps run in one transaction, retried once on an optimistic-locking conflict.
+ *
+ * <p><b>Not responsible for:</b> the signature and HTTP status codes
+ * ({@link CallbackController}), the allowed-change table ({@link CheckoutStatus}), calling the
+ * provider for a refund ({@link RefundService}), or transaction and retry handling
+ * ({@link RetryingTransaction}).
  */
 @Service
 public class CallbackService {

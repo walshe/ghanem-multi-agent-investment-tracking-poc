@@ -23,7 +23,17 @@ import poc.checkout.domain.PaymentEventStatus;
 import poc.checkout.service.CheckoutService;
 import tools.jackson.databind.JsonNode;
 
-/** The "checkouts" and "audit" endpoints of contract/checkout-api.yaml. */
+/**
+ * <b>Responsibility:</b> the HTTP layer for the "checkouts" and "audit" endpoints in
+ * contract/checkout-api.yaml: POST /checkouts, GET /checkouts/{checkoutId} and
+ * GET /checkouts/{checkoutId}/events.
+ *
+ * <p>Validates the request (amount is an integer of at least 100 minor units, currency is 3 capital
+ * letters), maps domain objects to the contract's JSON shapes, and picks the status code (201, 400, 404).
+ *
+ * <p><b>Not responsible for:</b> creating checkouts or talking to the provider ({@link CheckoutService}),
+ * or callbacks ({@link poc.checkout.callback.CallbackController}).
+ */
 @RestController
 public class CheckoutController {
 

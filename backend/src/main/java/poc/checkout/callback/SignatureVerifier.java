@@ -12,7 +12,17 @@ import org.springframework.stereotype.Component;
 
 import poc.checkout.config.ProviderProperties;
 
-/** Step 1 of processing a callback: X-Signature must be the lowercase hex HMAC-SHA256 of the raw body. */
+/**
+ * <b>Responsibility:</b> decide whether a callback really came from the provider. This is step 1
+ * of processing a callback: X-Signature must be the lowercase hex HMAC-SHA256 of the raw body,
+ * keyed with the shared signing secret.
+ *
+ * <p>Compares in constant time. Refuses to start without a real secret, so a missing
+ * PROVIDER_SIGNING_SECRET can never fall back to a known value.
+ *
+ * <p><b>Not responsible for:</b> reading the request or choosing the status code
+ * ({@link CallbackController}).
+ */
 @Component
 public class SignatureVerifier {
 

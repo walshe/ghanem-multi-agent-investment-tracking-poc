@@ -2,7 +2,13 @@ package poc.checkout.provider;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-/** The provider's Payment schema (contract/provider-api.yaml). */
+/**
+ * <b>Responsibility:</b> represent the provider's view of a payment (the Payment schema in
+ * contract/provider-api.yaml), and say whether its status is final.
+ *
+ * <p>The status is kept as the provider's raw string, because the provider has statuses we don't
+ * (PENDING, CANCELLED, REFUNDED).
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record ProviderPayment(
         String paymentId,

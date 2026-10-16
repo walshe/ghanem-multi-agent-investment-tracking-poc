@@ -16,6 +16,16 @@ import org.springframework.stereotype.Repository;
 import poc.checkout.domain.Checkout;
 import poc.checkout.domain.CheckoutStatus;
 
+/**
+ * <b>Responsibility:</b> store and load {@link Checkout}s in the {@code checkout} table.
+ *
+ * <p>Enforces optimistic locking: {@link #update} only writes if the row still has the version the
+ * checkout was read with, and throws {@link OptimisticLockingFailureException} otherwise. Plain SQL
+ * through {@link JdbcTemplate}, so every statement is visible.
+ *
+ * <p><b>Not responsible for:</b> deciding what to change (the services and the job), or
+ * transactions (the callers).
+ */
 @Repository
 public class CheckoutRepository {
 

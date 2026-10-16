@@ -4,8 +4,15 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * A checkout as stored. Immutable: the "with" methods return a copy that still carries the
- * version it was read with, so the repository can do an optimistic-locking update.
+ * <b>Responsibility:</b> represent one checkout's state: status, money, the provider's paymentId,
+ * whether a refund was requested, and whether a refused cancel is still being followed up.
+ *
+ * <p>Immutable. The "with" methods return a copy that still carries the version it was read with,
+ * so {@link poc.checkout.persistence.CheckoutRepository#update} can do an optimistic-locking update.
+ * Money is integer minor units plus an ISO 4217 currency code.
+ *
+ * <p><b>Not responsible for:</b> deciding which status changes are allowed ({@link CheckoutStatus}),
+ * or storing itself (the repository).
  */
 public record Checkout(
         UUID id,

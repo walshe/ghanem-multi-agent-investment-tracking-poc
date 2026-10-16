@@ -15,6 +15,16 @@ import poc.checkout.domain.EventOutcome;
 import poc.checkout.domain.PaymentEvent;
 import poc.checkout.domain.PaymentEventStatus;
 
+/**
+ * <b>Responsibility:</b> store and load the audit trail of {@link PaymentEvent}s in the
+ * {@code payment_event} table.
+ *
+ * <p>Owns duplicate detection: {@link #insertIfNew} relies on the unique constraint on event_id,
+ * so two callbacks with the same eventId can't both be stored, even when they arrive at the same moment.
+ *
+ * <p><b>Not responsible for:</b> deciding an event's outcome ({@link poc.checkout.callback.CallbackService}
+ * and the job).
+ */
 @Repository
 public class PaymentEventRepository {
 

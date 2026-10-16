@@ -9,9 +9,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * Runs work in one database transaction and, if it loses an optimistic-locking race
- * (another transaction updated the same checkout first), rolls back and retries once
- * with fresh data, as contract/states.md requires. A second conflict is thrown to the caller.
+ * <b>Responsibility:</b> the "retry once on conflict" rule from contract/states.md.
+ *
+ * <p>Runs work in one database transaction. If it loses an optimistic-locking race (another
+ * transaction updated the same checkout first), everything is rolled back and the work runs once
+ * more, so it re-reads fresh data. A second conflict is thrown to the caller.
+ *
+ * <p><b>Not responsible for:</b> what the work does. The work must re-read the checkout inside the
+ * supplier, otherwise the retry would reuse stale data.
  */
 @Component
 public class RetryingTransaction {

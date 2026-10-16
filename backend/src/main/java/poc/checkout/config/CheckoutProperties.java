@@ -6,7 +6,9 @@ import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Timings and settings from contract/states.md ("Late and missing callbacks").
+ * <b>Responsibility:</b> hold the checkout settings from application.yml (prefix {@code checkout}),
+ * typed and in one place. Includes the timings from contract/states.md ("Late and missing callbacks").
+ * The {@code fast} profile overrides the timings.
  *
  * @param callbackUrl        sent to the provider as the payment's callbackUrl
  * @param reconcileAfter     a non-final checkout older than this is reconciled with the provider

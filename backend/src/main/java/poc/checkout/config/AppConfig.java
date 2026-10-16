@@ -7,6 +7,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * <b>Responsibility:</b> wire up the application's infrastructure beans.
+ *
+ * <p>Currently that is two small things: the {@link Clock} every "now" comes from (tests replace it
+ * to move time forward), and CORS for the web and mobile apps (checkout.cors-allowed-origins,
+ * GET and POST on /checkouts/** only).
+ */
 @Configuration
 public class AppConfig implements WebMvcConfigurer {
 

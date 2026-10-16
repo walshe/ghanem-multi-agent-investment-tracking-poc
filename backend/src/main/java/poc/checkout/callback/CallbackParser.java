@@ -12,8 +12,14 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Parses a PaymentEvent body. Only called after the signature has been verified.
- * Reads a JSON tree and checks types by hand so an amount like 100.5 is rejected, not truncated.
+ * <b>Responsibility:</b> turn the bytes of a callback body into a {@link Callback}, or reject them.
+ *
+ * <p>Only called after the signature has been verified. Reads a JSON tree and checks every field by
+ * hand, so an amount like 100.5 or "100" is rejected instead of being coerced. Only PROCESSING,
+ * SUCCEEDED and FAILED are accepted as statuses.
+ *
+ * <p><b>Not responsible for:</b> whether the event makes sense for the checkout (amount match,
+ * order, duplicates). That is {@link CallbackService}.
  */
 @Component
 public class CallbackParser {

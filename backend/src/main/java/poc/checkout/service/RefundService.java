@@ -13,7 +13,11 @@ import poc.checkout.persistence.CheckoutRepository;
 import poc.checkout.provider.ProviderClient;
 
 /**
- * Refunds a payment that succeeded after its checkout expired (contract/states.md, "Refunds").
+ * <b>Responsibility:</b> refund a payment that succeeded after its checkout expired, at most once
+ * per checkout (contract/states.md, "Refunds").
+ *
+ * <p>Used by both paths that can find a late success: a callback ({@link poc.checkout.callback.CallbackService})
+ * and the follow-up of a refused cancel ({@link poc.checkout.job.CheckoutJob}).
  *
  * <p>Must run inside the caller's transaction. The checkout row is updated (and so locked)
  * <em>before</em> the provider is called. A concurrent refund attempt for the same checkout

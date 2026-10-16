@@ -38,8 +38,15 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Runs the real application on a random port against a WireMock fake of the provider.
- * Time is controlled with {@link MutableClock}; the scheduled job is run by calling {@link CheckoutJob#runOnce()}.
+ * <b>Responsibility:</b> give integration tests a running application and the tools to drive it.
+ *
+ * <p>Starts the real application on a random port against a WireMock fake of the provider, and
+ * resets the database, the fake provider and the clock before every test. Offers helpers to stub
+ * the provider, call the API, send correctly (or wrongly) signed callbacks, and move time forward.
+ * Time is controlled with {@link MutableClock}; the scheduled job is run by calling
+ * {@link CheckoutJob#runOnce()}.
+ *
+ * <p><b>Not responsible for:</b> any assertions about the rules. Those live in the subclasses.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")

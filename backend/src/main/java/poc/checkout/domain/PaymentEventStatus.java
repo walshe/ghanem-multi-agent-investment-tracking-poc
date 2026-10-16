@@ -2,7 +2,13 @@ package poc.checkout.domain;
 
 import java.util.Optional;
 
-/** Statuses the provider can report in a callback. PENDING and EXPIRED are ours, never the provider's. */
+/**
+ * <b>Responsibility:</b> the statuses a payment event can carry (PaymentEventStatus in
+ * checkout-api.yaml), and how each one maps to a {@link CheckoutStatus}.
+ *
+ * <p>PENDING and EXPIRED are ours, never the provider's, so they are not here. The provider's own
+ * PENDING, CANCELLED and REFUNDED have no counterpart, so {@link #parse} returns empty for them.
+ */
 public enum PaymentEventStatus {
     PROCESSING,
     SUCCEEDED,
