@@ -1,7 +1,10 @@
 package com.example.verification;
 
 /**
- * Where the services under test run.
+ * <b>Responsibility:</b> decide where the services under test run.
+ *
+ * <p>This is the only place that knows the backend and provider base URLs. It does not make
+ * HTTP calls ({@link Backend} and {@link Provider} do) and holds no test logic.
  *
  * <p>Lookup order: system property, then environment variable, then the default.
  * <ul>

@@ -9,7 +9,18 @@ import io.restassured.specification.RequestSpecification;
 import java.util.List;
 import java.util.Map;
 
-/** HTTP calls to the checkout backend, as described in contract/checkout-api.yaml. */
+/**
+ * <b>Responsibility:</b> talk HTTP to the checkout backend, exactly as described in
+ * {@code contract/checkout-api.yaml}, and turn its JSON into simple Java records.
+ *
+ * <p>Each method calls one endpoint and checks only the HTTP status the contract promises
+ * for a normal call (for example 201 for POST /checkouts). It makes no decisions about
+ * whether a checkout's status or events are <em>correct</em>; that is the job of
+ * {@link CheckoutScenariosTest}.
+ *
+ * <p>It does not call the provider (see {@link Provider}), and it gets its base URL from
+ * {@link TestConfig}.
+ */
 final class Backend {
 
     private static final RequestSpecification SPEC = new RequestSpecBuilder()
