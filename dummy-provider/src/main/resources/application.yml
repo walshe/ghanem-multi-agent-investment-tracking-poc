@@ -1,0 +1,15 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: dummy-provider
+
+provider:
+  # Never put the real value here. It comes from the environment.
+  signing-secret: ${PROVIDER_SIGNING_SECRET}
+  # Timings from contract/provider-api.yaml. Only tests change these.
+  final-after: 1s
+  retry-interval: 2s
+  max-retries: 3
+  callback-timeout: 5s
