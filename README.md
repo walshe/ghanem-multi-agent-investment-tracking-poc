@@ -115,8 +115,30 @@ How the agents were kept apart and checked:
   projects' code, so its tests check the contract rather than the implementation.
 - **Built against mocks.** The apps were developed against a Prism mock of the contract, and the
   backend and provider tests each use a fake of the other service, so no agent waited on another.
-- **Reviewed by a person.** Each agent committed to its own branch. A person reviewed each diff,
-  checked that nothing outside the agent's folder changed, and merged the branches into main.
+- **Reviewed by a person.** Each agent committed to its own branch, and a person reviewed every
+  branch before merging it into main.
+
+### Reviewing and merging a branch
+
+From the repo folder, check that the agent changed only its own folder and left the
+contract and agent setup alone:
+
+```bash
+git diff --stat main...worktree-backend                          # only backend/ should change
+git diff main...worktree-backend -- contract CLAUDE.md .claude   # must be empty
+```
+
+Then read the money code yourself: the callback handler, the status rules and the
+scheduled job. Merge the branches in this order, so each one lands after the services
+it depends on:
+
+```bash
+git merge worktree-provider
+git merge worktree-backend
+git merge worktree-tests
+git merge worktree-web
+git merge worktree-mobile
+```
 
 ## Run it
 
