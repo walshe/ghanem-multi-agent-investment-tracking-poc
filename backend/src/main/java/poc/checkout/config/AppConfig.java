@@ -13,6 +13,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * <p>Currently that is two small things: the {@link Clock} every "now" comes from (tests replace it
  * to move time forward), and CORS for the web and mobile apps (checkout.cors-allowed-origins,
  * GET and POST on /checkouts/** only).
+ *
+ * <p>These two are kept together on purpose because this is a proof of concept and both are tiny.
+ * In production code, split them into a ClockConfig and a CorsConfig so each has one responsibility.
  */
 @Configuration
 public class AppConfig implements WebMvcConfigurer {
