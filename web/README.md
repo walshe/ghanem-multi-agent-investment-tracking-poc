@@ -3,6 +3,20 @@
 React + TypeScript + Vite. Customers invest an amount in EUR and watch the checkout status.
 The app only shows the status the backend returns. It never decides a payment result.
 
+## Screenshots
+
+1. Enter an amount and invest.
+
+   ![Invest screen](step1.png)
+
+2. The status screen polls the backend while the payment is pending.
+
+   ![Waiting for payment](step2.png)
+
+3. The final status, once the backend has confirmed the payment.
+
+   ![Payment confirmed](step3.png)
+
 ## Run
 
 ```bash
