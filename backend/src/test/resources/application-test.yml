@@ -1,0 +1,8 @@
+provider:
+  # Test value only. The real secret comes from PROVIDER_SIGNING_SECRET.
+  signing-secret: test-signing-secret
+  read-timeout: 2s
+
+checkout:
+  # Tests run the job directly (CheckoutJob.runOnce) with a controllable clock.
+  job-enabled: false
