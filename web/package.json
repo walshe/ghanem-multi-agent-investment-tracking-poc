@@ -1,0 +1,37 @@
+{
+  "name": "web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint src --ignore-pattern 'src/api/**'",
+    "preview": "vite preview",
+    "generate-api": "openapi-generator-cli generate -i ../contract/checkout-api.yaml -g typescript-fetch -o src/api --additional-properties=supportsES6=true,typescriptThreePlus=true",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "mock": "prism mock ../contract/checkout-api.yaml",
+    "dev:mock": "VITE_API_BASE_URL=http://127.0.0.1:4010 vite"
+  },
+  "dependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.41.0",
+    "@stoplight/prism-cli": "^5.14.2",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.8",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "jsdom": "^29.1.1",
+    "oxlint": "^1.81.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.5"
+  }
+}
